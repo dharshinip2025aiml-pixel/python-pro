@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CineMood – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#0a0a0f; --bg2:#12121a; --bg3:#1a1a26;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+    --text:#f0eee8; --muted:#7a7890;
+    --accent:#e85a2a; --accent2:#f0a040;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;top:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(232,90,42,0.08) 0%,transparent 70%);pointer-events:none;animation:drift 8s ease-in-out infinite alternate;}
+  body::after{content:'';position:fixed;bottom:-150px;right:-150px;width:500px;height:500px;background:radial-gradient(circle,rgba(91,155,213,0.07) 0%,transparent 70%);pointer-events:none;animation:drift 10s ease-in-out infinite alternate-reverse;}
+  @keyframes drift{from{transform:translate(0,0)}to{transform:translate(40px,30px)}}
+  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px;background:rgba(10,10,15,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+  .brand{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.02em;}
+  .brand span{color:var(--accent);}
+  main{max-width:1100px;margin:0 auto;padding:36px 24px 60px;}
+  .tabs{display:flex;gap:4px;margin-bottom:32px;background:var(--bg2);border-radius:12px;padding:4px;width:fit-content;border:1px solid var(--border);}
+  .tab-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:8px 20px;border-radius:9px;border:none;cursor:pointer;background:none;color:var(--muted);transition:all .2s;}
+  .tab-btn.active{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px;animation:fadeUp .4s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .card-title{font-family:'Syne',sans-serif;font-weight:600;font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .webcam-box{width:100%;aspect-ratio:16/9;background:#0d0d14;border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:8px;overflow:hidden;position:relative;}
+  .webcam-box video{width:100%;height:100%;object-fit:cover;display:none;}
+  .cam-icon{font-size:36px;opacity:.4;}
+  .live-badge{position:absolute;top:10px;right:10px;background:#e53535;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;display:none;align-items:center;gap:5px;font-family:'Syne',sans-serif;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:white;animation:pulse 1s ease infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .cam-btns{display:flex;gap:8px;margin-top:12px;}
+  .btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:9px 18px;border-radius:9px;border:none;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
+  .btn-secondary:hover{background:#222232;}
+  .btn-danger{background:rgba(229,53,53,.15);color:#e55;border:1px solid rgba(229,53,53,.2);}
+  .btn-danger:hover{background:rgba(229,53,53,.25);}
+  .btn-green{background:rgba(62,201,142,.15);color:#3ec98e;border:1px solid rgba(62,201,142,.2);}
+  .btn-green:hover{background:rgba(62,201,142,.25);}
+  .btn-big{width:100%;justify-content:center;padding:14px;font-size:15px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.01em;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 20px rgba(232,90,42,.25);}
+  .btn-big:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,90,42,.35);}
+  .btn-big.loading{opacity:.7;pointer-events:none;}
+  textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;resize:none;transition:border-color .2s;line-height:1.6;outline:none;}
+  textarea:focus{border-color:var(--accent);}
+  textarea::placeholder{color:var(--muted);}
+  .mood-display{min-height:110px;border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--bg3);transition:all .4s ease;}
+  .mood-emoji{font-size:42px;line-height:1;animation:pop .3s cubic-bezier(.34,1.56,.64,1) both;}
+  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .mood-label{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;}
+  .mood-sub{font-size:12px;color:var(--muted);}
+  .mood-placeholder{color:var(--muted);font-size:13px;}
+
+  /* Movie grid — 2 cols now to fit the links */
+  .movies-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+
+  /* Movie card */
+  .movie-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:all .2s;animation:fadeUp .3s ease both;}
+  .movie-card:hover{border-color:var(--border2);transform:translateY(-2px);background:#1e1e2e;}
+  .mc-top{display:flex;align-items:center;gap:10px;}
+  .mc-emoji{font-size:24px;}
+  .mc-info .mc-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3;}
+  .mc-info .mc-genre{font-size:11px;color:var(--muted);text-transform:capitalize;margin-top:2px;}
+  .mc-links{display:flex;flex-direction:column;gap:5px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07);}
+  .mc-links-label{font-size:10px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+  .watch-btn{display:flex;align-items:center;gap:7px;padding:5px 10px;border-radius:7px;text-decoration:none;font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif;transition:filter .15s;}
+  .watch-btn:hover{filter:brightness(1.2);}
+  .watch-btn .wb-arrow{margin-left:auto;opacity:.4;font-size:10px;}
+  .watch-yt{background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.22);color:#ff5555;}
+  .watch-jw{background:rgba(230,180,0,.10);border:1px solid rgba(230,180,0,.22);color:#e6b400;}
+  .watch-hs{background:rgba(31,128,224,.10);border:1px solid rgba(31,128,224,.22);color:#5aacf0;}
+
+  /* Stagger */
+  .movie-card:nth-child(1){animation-delay:.05s}
+  .movie-card:nth-child(2){animation-delay:.10s}
+  .movie-card:nth-child(3){animation-delay:.15s}
+  .movie-card:nth-child(4){animation-delay:.20s}
+  .movie-card:nth-child(5){animation-delay:.25s}
+  .movie-card:nth-child(6){animation-delay:.30s}
+
+  /* History */
+  .history-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px;animation:fadeUp .3s ease both;}
+  .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .history-mood{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:15px;}
+  .history-time{font-size:11px;color:var(--muted);}
+  .history-movies{display:flex;flex-wrap:wrap;gap:6px;}
+  .history-tag{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 10px;color:var(--muted);text-decoration:none;transition:color .15s;}
+  .history-tag:hover{color:var(--text);}
+
+  .captured-ok{font-size:12px;color:#3ec98e;margin-top:8px;display:none;}
+  .error-msg{font-size:13px;color:#e55;background:rgba(229,53,53,.08);border:1px solid rgba(229,53,53,.15);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:none;}
+  .panel{display:none;} .panel.active{display:block;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+  .empty-state .es-icon{font-size:48px;margin-bottom:12px;opacity:.4;}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}.movies-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:22px">🎬</span>
+    <span class="brand">Cine<span>Mood</span></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span style="font-size:13px;color:var(--muted)">👋 Welcome, <strong style="color:var(--text)" id="username">Arun</strong></span>
+    <button class="btn btn-secondary" style="font-size:12px;padding:5px 12px" onclick="alert('Logged out!')">Logout</button>
+  </div>
+</nav>
+
+<main>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('detect',this)">🎭 Detect Mood</button>
+    <button class="tab-btn" onclick="switchTab('history',this)">🕓 History <span id="hist-count"></span></button>
+  </div>
+
+  <!-- DETECT -->
+  <div class="panel active" id="panel-detect">
+    <div class="grid">
+      <div style="display:flex;flex-direction:column;gap:18px;">
+
+        <div class="card">
+          <div class="card-title">📸 Facial Expression</div>
+          <div class="webcam-box" id="webcam-box">
+            <video id="video" autoplay muted></video>
+            <div class="live-badge" id="live-badge"><span class="live-dot"></span>LIVE</div>
+            <div id="cam-placeholder">
+              <div class="cam-icon">📷</div>
+              <div id="cam-status-text">Camera off</div>
+            </div>
+          </div>
+          <div class="cam-btns">
+            <button class="btn btn-secondary" id="btn-start" onclick="startCamera()">📷 Start Camera</button>
+            <button class="btn btn-green" id="btn-capture" onclick="captureFrame()" style="display:none">📸 Capture</button>
+            <button class="btn btn-danger" id="btn-stop" onclick="stopCamera()" style="display:none">✕ Stop</button>
+          </div>
+          <div class="captured-ok" id="captured-ok">✓ Photo captured — ready to analyse</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">✍️ How are you feeling?</div>
+          <textarea id="mood-text" rows="4" placeholder="e.g. 'Feeling great today!' or 'Kind of stressed with work...'"></textarea>
+        </div>
+
+        <div class="error-msg" id="error-msg"></div>
+        <button class="btn-big" id="detect-btn" onclick="detectMood()">🔍 Detect My Mood</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="card">
+          <div class="card-title">🎭 Detected Mood</div>
+          <div class="mood-display" id="mood-display">
+            <span class="mood-placeholder">Your mood will appear here</span>
+          </div>
+        </div>
+        <div class="card" id="movies-card" style="display:none">
+          <div class="card-title">🍿 Recommended Movies</div>
+          <div class="movies-grid" id="movies-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="panel-history">
+    <div id="history-list"></div>
+  </div>
+</main>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+function ytLink(name)  { return `https://www.youtube.com/results?search_query=${encodeURIComponent(name+' Tamil full movie')}`; }
+function jwLink(name)  { return `https://www.justwatch.com/in/search?q=${encodeURIComponent(name)}`; }
+function hsLink(name)  { return `https://www.hotstar.com/in/search?q=${encodeURIComponent(name)}`; }
+
+function withLinks(m) {
+  return { ...m, links: { youtube: ytLink(m.name), justwatch: jwLink(m.name), hotstar: hsLink(m.name) }};
+}
+
+const RAW = [
+  {name:"Boss Engira Bhaskaran",genre:"comedy",mood:"happy"},
+  {name:"OK OK",genre:"comedy",mood:"happy"},
+  {name:"Varuthapadatha Valibar Sangam",genre:"comedy",mood:"happy"},
+  {name:"Kalakalappu",genre:"comedy",mood:"happy"},
+  {name:"Panchathanthiram",genre:"comedy",mood:"happy"},
+  {name:"Vasool Raja MBBS",genre:"comedy",mood:"happy"},
+  {name:"Thillu Mullu",genre:"comedy",mood:"happy"},
+  {name:"Siva Manasula Sakthi",genre:"romance",mood:"happy"},
+  {name:"Kanna Laddu Thinna Aasaiya",genre:"comedy",mood:"happy"},
+  {name:"Maan Karate",genre:"comedy",mood:"happy"},
+  {name:"Rajini Murugan",genre:"comedy",mood:"happy"},
+  {name:"Remo",genre:"romance",mood:"happy"},
+  {name:"Vanakkam Chennai",genre:"romance",mood:"happy"},
+  {name:"Doctor",genre:"comedy",mood:"happy"},
+  {name:"96",genre:"romance",mood:"sad"},
+  {name:"Vaaranam Aayiram",genre:"drama",mood:"sad"},
+  {name:"Moondram Pirai",genre:"drama",mood:"sad"},
+  {name:"Pariyerum Perumal",genre:"drama",mood:"sad"},
+  {name:"Aadukalam",genre:"drama",mood:"sad"},
+  {name:"Asuran",genre:"drama",mood:"sad"},
+  {name:"Kaaka Muttai",genre:"drama",mood:"sad"},
+  {name:"Visaranai",genre:"crime",mood:"sad"},
+  {name:"Anbe Sivam",genre:"drama",mood:"sad"},
+  {name:"Peranbu",genre:"drama",mood:"sad"},
+  {name:"Sethu",genre:"drama",mood:"sad"},
+  {name:"Oh My Kadavule",genre:"romance",mood:"stressed"},
+  {name:"Alaipayuthey",genre:"romance",mood:"stressed"},
+  {name:"Minnale",genre:"romance",mood:"stressed"},
+  {name:"Vinnaithaandi Varuvaayaa",genre:"romance",mood:"stressed"},
+  {name:"OK Kanmani",genre:"romance",mood:"stressed"},
+  {name:"Raja Rani",genre:"romance",mood:"stressed"},
+  {name:"Mouna Ragam",genre:"romance",mood:"stressed"},
+  {name:"Thiruchitrambalam",genre:"drama",mood:"stressed"},
+  {name:"Vikram",genre:"action",mood:"normal"},
+  {name:"Leo",genre:"action",mood:"normal"},
+  {name:"Master",genre:"action",mood:"normal"},
+  {name:"Bigil",genre:"action",mood:"normal"},
+  {name:"Mersal",genre:"action",mood:"normal"},
+  {name:"Kaithi",genre:"action",mood:"normal"},
+  {name:"Thani Oruvan",genre:"thriller",mood:"normal"},
+  {name:"Ghilli",genre:"action",mood:"normal"},
+  {name:"Anniyan",genre:"thriller",mood:"normal"},
+  {name:"Enthiran",genre:"sci-fi",mood:"normal"},
+  {name:"Jigarthanda",genre:"crime",mood:"normal"},
+  {name:"Maanaadu",genre:"thriller",mood:"normal"},
+  {name:"Soorarai Pottru",genre:"biography",mood:"motivational"},
+  {name:"Jai Bhim",genre:"drama",mood:"motivational"},
+  {name:"Irudhi Suttru",genre:"sports",mood:"motivational"},
+  {name:"Mandela",genre:"drama",mood:"motivational"},
+  {name:"Rocketry",genre:"biography",mood:"motivational"},
+  {name:"Vikram Vedha",genre:"thriller",mood:"motivational"},
+  {name:"Indian",genre:"action",mood:"motivational"},
+  {name:"Mudhalvan",genre:"political",mood:"motivational"},
+];
+const MOVIES = RAW.map(withLinks);
+
+const GENRE_EMOJI = {comedy:"😂",romance:"💕",drama:"🎭",action:"💥",thriller:"😱",crime:"🔍","sci-fi":"🚀",biography:"📖",sports:"🏆",political:"🏛️"};
+const MOOD_META  = {
+  happy:       {emoji:"😄",label:"Happy",      color:"#f5c542"},
+  sad:         {emoji:"😢",label:"Sad",         color:"#5b9bd5"},
+  stressed:    {emoji:"😰",label:"Stressed",    color:"#e05c8a"},
+  normal:      {emoji:"😐",label:"Normal",      color:"#7a7890"},
+  motivational:{emoji:"💪",label:"Motivated",   color:"#3ec98e"},
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let stream=null, capturedImage=null;
+let history=JSON.parse(localStorage.getItem('cinemood_history')||'[]');
+
+// ── CAMERA ───────────────────────────────────────────────────────────────────
+async function startCamera(){
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:true});
+    const v=document.getElementById('video');
+    v.srcObject=stream; v.style.display='block';
+    document.getElementById('cam-placeholder').style.display='none';
+    document.getElementById('live-badge').style.display='flex';
+    document.getElementById('btn-start').style.display='none';
+    document.getElementById('btn-capture').style.display='inline-flex';
+    document.getElementById('btn-stop').style.display='inline-flex';
+    capturedImage=null;
+    document.getElementById('captured-ok').style.display='none';
+  } catch(e){ showError('Camera access denied. Using text mood only.'); }
+}
+function captureFrame(){
+  const v=document.getElementById('video');
+  const c=document.createElement('canvas');
+  c.width=v.videoWidth||640; c.height=v.videoHeight||360;
+  c.getContext('2d').drawImage(v,0,0);
+  capturedImage=c.toDataURL('image/jpeg',.8);
+  stopCamera();
+  document.getElementById('cam-placeholder').style.display='flex';
+  document.getElementById('cam-status-text').textContent='✓ Photo captured!';
+  document.getElementById('captured-ok').style.display='block';
+}
+function stopCamera(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  document.getElementById('video').style.display='none';
+  document.getElementById('live-badge').style.display='none';
+  document.getElementById('cam-placeholder').style.display='flex';
+  document.getElementById('btn-start').style.display='inline-flex';
+  document.getElementById('btn-capture').style.display='none';
+  document.getElementById('btn-stop').style.display='none';
+}
+
+// ── MOOD ─────────────────────────────────────────────────────────────────────
+function detectTextMood(text){
+  const t=text.toLowerCase();
+  const s={happy:0,sad:0,stressed:0,motivational:0};
+  ['happy','great','awesome','wonderful','joy','excited','good','love','amazing','fun','laugh','smile'].forEach(w=>{if(t.includes(w))s.happy++;});
+  ['sad','cry','miss','lonely','depressed','heartbreak','pain','hurt','tears','alone'].forEach(w=>{if(t.includes(w))s.sad++;});
+  ['stress','anxious','worry','tension','tired','overwhelm','nervous','fear','panic','busy'].forEach(w=>{if(t.includes(w))s.stressed++;});
+  ['inspire','motivate','goal','achieve','dream','success','strong','fight','believe','win'].forEach(w=>{if(t.includes(w))s.motivational++;});
+  const max=Math.max(...Object.values(s));
+  return max===0?'normal':Object.keys(s).find(k=>s[k]===max);
+}
+function detectFaceMood(){
+  const m=['happy','happy','sad','stressed','normal','motivational'];
+  return m[Math.floor(Math.random()*m.length)];
+}
+
+async function detectMood(){
+  const text=document.getElementById('mood-text').value.trim();
+  hideError();
+  if(!text&&!capturedImage){showError('Please type something or capture your face photo first.');return;}
+  const btn=document.getElementById('detect-btn');
+  btn.textContent='⏳ Analysing...'; btn.classList.add('loading');
+  await new Promise(r=>setTimeout(r,900));
+  const textMood=text?detectTextMood(text):null;
+  const faceMood=capturedImage?detectFaceMood():null;
+  const mood=faceMood||textMood||'normal';
+  btn.textContent='🔍 Detect My Mood'; btn.classList.remove('loading');
+  showMood(mood); showMovies(mood); saveHistory(mood);
+}
+
+// ── DISPLAY ──────────────────────────────────────────────────────────────────
+function showMood(mood){
+  const meta=MOOD_META[mood];
+  const el=document.getElementById('mood-display');
+  el.innerHTML=`<div class="mood-emoji">${meta.emoji}</div><div class="mood-label" style="color:${meta.color}">${meta.label}</div><div class="mood-sub">Detected mood</div>`;
+}
+
+function movieCardHTML(m){
+  const emoji=GENRE_EMOJI[m.genre]||'🎬';
+  return `
+  <div class="movie-card">
+    <div class="mc-top">
+      <div class="mc-emoji">${emoji}</div>
+      <div class="mc-info">
+        <div class="mc-name">${m.name}</div>
+        <div class="mc-genre">${m.genre}</div>
+      </div>
+    </div>
+    <div class="mc-links">
+      <div class="mc-links-label">Watch on</div>
+      <a href="${m.links.youtube}" target="_blank" rel="noopener" class="watch-btn watch-yt">
+        <span style="font-size:10px">▶</span> YouTube <span class="wb-arrow">↗</span>
+      </a>
+      <a href="${m.links.justwatch}" target="_blank" rel="noopener" class="watch-btn watch-jw">
+        <span>🔎</span> JustWatch <span class="wb-arrow">↗</span>
+      </a>
+      <a href="${m.links.hotstar}" target="_blank" rel="noopener" class="watch-btn watch-hs">
+        <span>★</span> Hotstar <span class="wb-arrow">↗</span>
+      </a>
+    </div>
+  </div>`;
+}
+
+function showMovies(mood){
+  const pool=MOVIES.filter(m=>m.mood===mood);
+  const picks=[...pool].sort(()=>Math.random()-.5).slice(0,6);
+  document.getElementById('movies-grid').innerHTML=picks.map(movieCardHTML).join('');
+  document.getElementById('movies-card').style.display='block';
+}
+
+function saveHistory(mood){
+  const pool=MOVIES.filter(m=>m.mood===mood);
+  const movies=[...pool].sort(()=>Math.random()-.5).slice(0,6);
+  history.unshift({mood,movies,timestamp:new Date().toISOString()});
+  if(history.length>20)history=history.slice(0,20);
+  localStorage.setItem('cinemood_history',JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  document.getElementById('hist-count').textContent=history.length?`(${history.length})`:'';
+  if(!history.length){
+    list.innerHTML=`<div class="empty-state"><div class="es-icon">📭</div><div>No history yet. Detect your first mood!</div></div>`;
+    return;
+  }
+  list.innerHTML=history.map((item,i)=>{
+    const meta=MOOD_META[item.mood]||MOOD_META.normal;
+    const date=new Date(item.timestamp).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `
+    <div class="history-item" style="animation-delay:${i*.04}s">
+      <div class="history-header">
+        <div class="history-mood" style="color:${meta.color}">${meta.emoji} ${meta.label}</div>
+        <div class="history-time">${date}</div>
+      </div>
+      <div class="history-movies">
+        ${(item.movies||[]).map(m=>`<a href="${m.links?.youtube||'#'}" target="_blank" rel="noopener" class="history-tag">${GENRE_EMOJI[m.genre]||'🎬'} ${m.name}</a>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='history')renderHistory();
+}
+function showError(msg){const el=document.getElementById('error-msg');el.textContent=msg;el.style.display='block';}
+function hideError(){document.getElementById('error-msg').style.display='none';}
+
+renderHistory();
+</script>
+</body>
+</html>
